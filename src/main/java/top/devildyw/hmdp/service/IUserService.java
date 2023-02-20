@@ -6,6 +6,7 @@ import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.entity.User;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * <p>
@@ -32,4 +33,11 @@ public interface IUserService extends IService<User> {
      * @return
      */
     Result login(LoginFormDTO loginForm, HttpSession session);
+
+    /**
+     * 批量查询
+     * @param ids
+     * @return
+     */
+    List<User> queryBatch(List<Long> ids);
 }
