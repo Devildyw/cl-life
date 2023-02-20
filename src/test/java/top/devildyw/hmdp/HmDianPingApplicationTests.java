@@ -1,4 +1,4 @@
-package top.hmdp;
+package top.devildyw.hmdp;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
