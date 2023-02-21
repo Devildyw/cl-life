@@ -1,5 +1,6 @@
 package top.devildyw.hmdp.service;
 
+import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.entity.ShopType;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,5 +13,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2021-12-22
  */
 public interface IShopTypeService extends IService<ShopType> {
+
+    /**
+     * 查询商品类型列表（缓存）
+     * @return
+     */
+    Result queryTypeList();
 
 }
