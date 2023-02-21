@@ -2,21 +2,16 @@ package top.devildyw.hmdp.service.impl;
 
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Service;
 import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.entity.Shop;
 import top.devildyw.hmdp.mapper.ShopMapper;
 import top.devildyw.hmdp.service.IShopService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 import top.devildyw.hmdp.utils.CacheClient;
-import top.devildyw.hmdp.utils.RedisData;
 
 import javax.annotation.Resource;
-
-import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static top.devildyw.hmdp.utils.RedisConstants.*;
@@ -44,7 +39,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         //防止缓存穿透
 //        Shop shop = cacheClient.queryWithPassThrough(CACHE_SHOP_KEY,id,Shop.class,this::getById,CACHE_SHOP_TTL,TimeUnit.MINUTES);
 
-//        //1. 互斥锁解决缓存击穿
+        //1. 互斥锁解决缓存击穿
         Shop shop = cacheClient.queryWithMutex(CACHE_SHOP_KEY,id, Shop.class,this::getById,CACHE_SHOP_TTL,TimeUnit.MINUTES);
 
         //2. 逻辑过期时间解决缓存击穿（需要在项目启动时 预热缓存数据）
