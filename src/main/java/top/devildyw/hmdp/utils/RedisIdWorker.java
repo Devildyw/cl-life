@@ -43,7 +43,7 @@ public class RedisIdWorker {
         //2. 生成序列号
         //3. 获取当前日期，精确到天 既可以统计那一天的订单量 还可以避免同一个key的情况下 自增超过2^32
         String date = now.format(DateTimeFormatter.ofPattern("yyyy:MM:dd"));
-        Long count = stringRedisTemplate.opsForValue().increment("icr:" + keyPrefix + ":" + date);
+        Long count = stringRedisTemplate.opsForValue().increment("icr:" + keyPrefix + date);
 
         //3. 拼接并返回
         //移位拼接 世界戳向左移动32位 让出序列号的位置，时间戳不会超过31位
