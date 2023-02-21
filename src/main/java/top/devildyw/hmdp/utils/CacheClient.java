@@ -183,6 +183,18 @@ public class CacheClient {
     }
 
 
+    /**
+     * 使用互斥锁解决缓存击穿问题
+     * @param keyPrefix  缓存key前缀
+     * @param id         构建缓存用的标识
+     * @param type       类型
+     * @param dbFallback 构建缓存用的数据库方法
+     * @param expireTime 过期时间
+     * @param unit       时间单位
+     * @param <R>
+     * @param <ID>
+     * @return
+     */
     public <R,ID> R queryWithMutex(String keyPrefix, ID id, Class<R> type, Function<ID, R> dbFallback, Long expireTime, TimeUnit unit){
         String cacheKey = keyPrefix + id;
 
