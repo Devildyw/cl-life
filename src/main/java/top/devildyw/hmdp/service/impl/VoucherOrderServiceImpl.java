@@ -3,6 +3,7 @@ package top.devildyw.hmdp.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.devildyw.hmdp.dto.Result;
@@ -13,6 +14,7 @@ import top.devildyw.hmdp.service.ISeckillVoucherService;
 import top.devildyw.hmdp.service.IVoucherOrderService;
 import top.devildyw.hmdp.service.IVoucherService;
 import top.devildyw.hmdp.utils.RedisIdWorker;
+import top.devildyw.hmdp.utils.SimpleRedisLock;
 import top.devildyw.hmdp.utils.UserHolder;
 
 import javax.annotation.Resource;
@@ -37,6 +39,9 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     @Resource
     private RedisIdWorker idWorker;
 
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
     @Override
     public Result seckillVoucher(Long voucherId) {
         //1. 查询优惠券
@@ -60,15 +65,39 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             return Result.fail("库存不足！");
         }
 
+//        java 本地锁 synchronized
+//        //用户id 从 ThreadLocalMap 中取出
+//        Long userId = UserHolder.getUser().getId();
+//        //锁住同一个用户 userId.toString() 底层会创建一个字符串对象，加上intern就会在字符串常量池中找
+//        //锁住整个方法，防止事务来不及提交导致的线程安全问题
+//        synchronized(userId.toString().intern()) {
+//            //使用代理对象调用方法使得方法事务生效（AOP 需要找到它的代理对象才能生效）
+//            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();
+//            //8. 返回订单id
+//            return proxy.createVoucherOrder(voucherId);
+//        }
+
+        //5. Redis 分布式锁
         //用户id 从 ThreadLocalMap 中取出
         Long userId = UserHolder.getUser().getId();
-        //锁住同一个用户 userId.toString() 底层会创建一个字符串对象，加上intern就会在字符串常量池中找
-        //锁住整个方法，防止事务来不及提交导致的线程安全问题
-        synchronized(userId.toString().intern()) {
-            //使用代理对象调用方法使得方法事务生效（AOP 需要找到它的代理对象才能生效）
+        //5.1 创建锁对象
+        SimpleRedisLock lock = new SimpleRedisLock(stringRedisTemplate, ORDER_ID_KEY + userId);
+        //5.2 获取锁
+        boolean isLock = lock.tryLock(1200);
+
+        if (!isLock){
+            //5.3 获取锁失败,返回错误或重试
+            return Result.fail("不允许重复下单!");
+        }
+
+        //5.4 获取锁成功
+        try {
+            //获取代理对象
             IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();
-            //8. 返回订单id
             return proxy.createVoucherOrder(voucherId);
+        }finally {
+            //5.5释放锁
+            lock.unLock();
         }
     }
 
