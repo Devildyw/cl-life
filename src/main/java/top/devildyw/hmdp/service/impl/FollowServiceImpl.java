@@ -110,4 +110,9 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
 
 
     }
+
+    @Override
+    public List<Long> getUserIdsByFollowUserId(Long followUserId) {
+        return baseMapper.selectUserIdsByFollowUserId(followUserId);
+    }
 }

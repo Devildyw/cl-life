@@ -4,6 +4,8 @@ import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.entity.Follow;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -35,4 +37,11 @@ public interface IFollowService extends IService<Follow> {
      * @return
      */
     Result followCommons(Long followUserId);
+
+    /**
+     * 获取用户粉丝的id列表
+     * @param id
+     * @return
+     */
+    List<Long> getUserIdsByFollowUserId(Long id);
 }

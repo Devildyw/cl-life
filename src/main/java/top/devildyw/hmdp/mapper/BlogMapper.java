@@ -5,6 +5,7 @@ import top.devildyw.hmdp.entity.Blog;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import top.devildyw.hmdp.entity.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,4 +18,5 @@ import java.util.List;
  */
 public interface BlogMapper extends BaseMapper<Blog> {
 
+    List<Blog> selectBlogsBatchOrderByBlogsId(ArrayList<Long> blogIds);
 }

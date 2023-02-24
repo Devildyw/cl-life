@@ -3,6 +3,8 @@ package top.devildyw.hmdp.mapper;
 import top.devildyw.hmdp.entity.Follow;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import java.util.List;
+
 /**
  * <p>
  *  Mapper 接口
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface FollowMapper extends BaseMapper<Follow> {
 
+    List<Long> selectUserIdsByFollowUserId(Long followUserId);
 }

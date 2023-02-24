@@ -42,4 +42,19 @@ public interface IBlogService extends IService<Blog> {
      * @return
      */
     Result queryBlogLikes(Long id);
+
+    /**
+     * 保存 Blog 并且将 blogId 以 Redis 实现的 feed 流(推模式) 发送给关注者
+     * @param blog
+     * @return
+     */
+    Result saveBlog(Blog blog);
+
+    /**
+     * 从 redis 用户信箱中获取他关注的用户的blog
+     * @param max 最大score
+     * @param offset 偏移量
+     * @return
+     */
+    Result queryBlogOfFollow(Long max, Integer offset);
 }
