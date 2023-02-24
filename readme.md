@@ -526,3 +526,41 @@ while(true){
 * 没有消息漏读的风险
 * 有消息确认机制，确保消息至少被消费一次
 
+
+
+### 总结
+
+![image-20230224161145302](https://ding-blog.oss-cn-chengdu.aliyuncs.com/images/image-20230224161145302.png)
+
+
+
+## Redis 实现点赞
+
+### 点赞
+
+需求：
+
+* 同一个用户只能点赞一次，再次点赞则取消点赞
+* 如果当前用户已经点赞，则点赞按钮高亮显示（前端实现，根据字段 Blog 类的 isLike 属性）
+
+实现：
+
+* 通过在 Blog 类中添加 isLiked 字段，在查询 Blog 列表时，供给前端实现高亮。
+* 将点赞过的用户存入到 Redis set 结构中，通过这样来set中是否有当前用户来判断是否点赞，如果没有就将用户添加到 set 中。
+
+### 点赞排行榜
+
+需求：按照点赞时间先后排序，返回 TOP 5 的用户
+
+![image-20230224161238177](https://ding-blog.oss-cn-chengdu.aliyuncs.com/images/image-20230224161238177.png)
+
+为了实现排序的功能，又要实现点赞一个用户只能点一次的性质，可以使用 Redis 的 SortedSet 结构
+
+> SortedSet 的与 Set 不同没有直接提供 `isMember` 的方法来判断元素是否存在。但是可以通过 zscore 方法获取一个元素的分数来判断是否元素存在。
+
+
+
+## Redis 实现关注
+
+### 关注
+

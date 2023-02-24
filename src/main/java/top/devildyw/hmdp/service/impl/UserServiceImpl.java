@@ -129,6 +129,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return users;
     }
 
+    @Override
+    public List<UserDTO> queryListByOrder(List<Long> ids) {
+
+        return baseMapper.selectBatchIdsByOrder(ids);
+    }
+
 
     /**
      * 根据手机号创建新用户并保存到数据库
@@ -145,4 +151,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         return user;
     }
+
+
 }

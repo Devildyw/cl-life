@@ -57,10 +57,7 @@ public class BlogController {
 
     @PutMapping("/like/{id}")
     public Result likeBlog(@PathVariable("id") Long id) {
-        // 修改点赞数量
-        blogService.update()
-                .setSql("liked = liked + 1").eq("id", id).update();
-        return Result.ok();
+        return blogService.likeBlog(id);
     }
 
     @GetMapping("/of/me")
@@ -77,31 +74,16 @@ public class BlogController {
 
     @GetMapping("/hot")
     public Result queryHotBlog(@RequestParam(value = "current", defaultValue = "1") Integer current) {
-        // 1. 按照喜欢度分页查询出blog
-        Page<Blog> page = blogService.query()
-                .orderByDesc("liked")
-                .page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
-        //2.  获取当前页数据
-        List<Blog> records = page.getRecords();
-        //3. 批量查询用户 防止循环查表提升系统吞吐量
-        List<Long> ids = records.stream().map(Blog::getUserId).distinct().collect(Collectors.toList());
-        List<User> users = userService.queryBatch(ids);
+        return blogService.queryHotBlog(current);
+    }
 
-        //4. 当用户列表不为空时才拼装
-        if (!users.isEmpty()){
-            Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, (u) -> u));
-            records = records.stream().map((item) -> {
-                User user = userMap.get(item.getUserId());
-                if (ObjectUtil.isNotNull(user)){
-                    //封装blog对于用户相关数据
-                    item.setName(user.getNickName());
-                    item.setIcon(user.getIcon());
-                }
-                return item;
-            }).collect(Collectors.toList());
-        }
+    @GetMapping("{id}")
+    public Result queryBlog(@PathVariable("id") Long id){
+        return blogService.queryBlogById(id);
+    }
 
-
-        return Result.ok(records);
+    @GetMapping("/likes/{id}")
+    public Result queryBlogLikes(@PathVariable("id") Long id){
+        return blogService.queryBlogLikes(id);
     }
 }

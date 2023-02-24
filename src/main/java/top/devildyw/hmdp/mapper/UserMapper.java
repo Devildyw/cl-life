@@ -1,7 +1,10 @@
 package top.devildyw.hmdp.mapper;
 
+import top.devildyw.hmdp.dto.UserDTO;
 import top.devildyw.hmdp.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface UserMapper extends BaseMapper<User> {
 
+    List<UserDTO> selectBatchIdsByOrder(List<Long> ids);
 }

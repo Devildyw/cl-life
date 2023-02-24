@@ -3,6 +3,7 @@ package top.devildyw.hmdp.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import top.devildyw.hmdp.dto.LoginFormDTO;
 import top.devildyw.hmdp.dto.Result;
+import top.devildyw.hmdp.dto.UserDTO;
 import top.devildyw.hmdp.entity.User;
 
 import javax.servlet.http.HttpSession;
@@ -40,4 +41,11 @@ public interface IUserService extends IService<User> {
      * @return
      */
     List<User> queryBatch(List<Long> ids);
+
+    /**
+     * 通过给出的 id 顺序返回列表
+     * @param ids
+     * @return
+     */
+    List<UserDTO> queryListByOrder(List<Long> ids);
 }

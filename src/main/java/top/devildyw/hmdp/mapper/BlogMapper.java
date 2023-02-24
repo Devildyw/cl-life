@@ -1,7 +1,11 @@
 package top.devildyw.hmdp.mapper;
 
+import top.devildyw.hmdp.dto.UserDTO;
 import top.devildyw.hmdp.entity.Blog;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import top.devildyw.hmdp.entity.User;
+
+import java.util.List;
 
 /**
  * <p>
