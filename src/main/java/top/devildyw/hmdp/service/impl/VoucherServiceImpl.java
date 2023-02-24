@@ -1,6 +1,7 @@
 package top.devildyw.hmdp.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.entity.SeckillVoucher;
 import top.devildyw.hmdp.entity.Voucher;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
 
+import static top.devildyw.hmdp.utils.RedisConstants.SECKILL_STOCK_KEY;
+
 /**
  * <p>
  *  服务实现类
@@ -23,6 +26,9 @@ import java.util.List;
  */
 @Service
 public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> implements IVoucherService {
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Resource
     private ISeckillVoucherService seckillVoucherService;
@@ -47,5 +53,8 @@ public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> impl
         seckillVoucher.setBeginTime(voucher.getBeginTime());
         seckillVoucher.setEndTime(voucher.getEndTime());
         seckillVoucherService.save(seckillVoucher);
+
+        // 保存秒杀券库存信息到 Redis 中  todo:不设置有效期了可以判断库存是否为0来判断是否删除key
+        stringRedisTemplate.opsForValue().set(SECKILL_STOCK_KEY+voucher.getId(),voucher.getStock().toString());
     }
 }
