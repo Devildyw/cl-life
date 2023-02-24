@@ -1,19 +1,24 @@
 package top.devildyw.hmdp.controller;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import top.devildyw.hmdp.dto.LoginFormDTO;
 import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.dto.UserDTO;
+import top.devildyw.hmdp.entity.Blog;
+import top.devildyw.hmdp.entity.User;
 import top.devildyw.hmdp.entity.UserInfo;
 import top.devildyw.hmdp.service.IUserInfoService;
 import top.devildyw.hmdp.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import top.devildyw.hmdp.utils.SystemConstants;
 import top.devildyw.hmdp.utils.UserHolder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <p>
@@ -70,6 +75,19 @@ public class UserController {
         return Result.ok(user);
     }
 
+    @GetMapping("/{id}")
+    public Result queryUserById(@PathVariable("id") Long userId){
+        // 查询详情
+        User user = userService.getById(userId);
+        if (user == null) {
+            return Result.ok();
+        }
+        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        // 返回
+        return Result.ok(userDTO);
+    }
+
+
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Long userId){
         // 查询详情
@@ -83,4 +101,7 @@ public class UserController {
         // 返回
         return Result.ok(info);
     }
+
+
+
 }
