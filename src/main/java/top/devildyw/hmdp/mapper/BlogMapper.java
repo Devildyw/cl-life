@@ -18,5 +18,5 @@ import java.util.List;
  */
 public interface BlogMapper extends BaseMapper<Blog> {
 
-    List<Blog> selectBlogsBatchOrderByBlogsId(ArrayList<Long> blogIds);
+    List<Blog> selectBatchIdsOrderByIds(List<Long> blogIds);
 }

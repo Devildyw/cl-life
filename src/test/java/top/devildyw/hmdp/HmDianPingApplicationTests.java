@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import top.devildyw.hmdp.entity.Shop;
 import top.devildyw.hmdp.service.IShopService;
@@ -12,12 +13,15 @@ import top.devildyw.hmdp.utils.RedisIdWorker;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static top.devildyw.hmdp.utils.RedisConstants.CACHE_SHOP_KEY;
+import static top.devildyw.hmdp.utils.RedisConstants.SHOP_GEO_KEY;
+
 @Slf4j
 @SpringBootTest
 class HmDianPingApplicationTests {
@@ -65,6 +69,18 @@ class HmDianPingApplicationTests {
         latch.await();
         long end = System.currentTimeMillis();
         System.out.println("time = "+(end-begin));
+    }
+
+    @Test
+    public void loadShopData(){
+        //1. 查询店铺信息
+        List<Shop> list = shopService.list();
+        //2. 按照类型对店铺分组 以typeId分组 todo 使用批量加入的方式
+        for (Shop shop : list) {
+            String key = SHOP_GEO_KEY+shop.getTypeId();
+            stringRedisTemplate.opsForGeo().add(key,new Point(shop.getX(),shop.getY()),shop.getId().toString());
+        }
+        //
     }
 
 

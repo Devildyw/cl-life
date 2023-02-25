@@ -8,7 +8,7 @@
     </resultMap>
 
 
-    <select id="selectBatchIdsByOrder" resultMap="userDTO">
+    <select id="selectBatchIdsOrderByIds" resultMap="userDTO">
         select id, icon, nick_name from tb_user
         <where>
             id in

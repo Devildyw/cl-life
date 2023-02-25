@@ -231,7 +231,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         //2. 查询收件箱 ZREVRANGEBYSCORE key Max Min LIMIT offset count 根据时间戳降序获取
         String key = FEED_KEY + userId;
         Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
-                .rangeByScoreWithScores(key, 0, max, offset, DEFAULT_PAGE_SIZE);
+                .reverseRangeByScoreWithScores(key, 0, max, offset, DEFAULT_PAGE_SIZE);
 
         //3. 判空
         if (typedTuples == null || typedTuples.isEmpty()) {
@@ -241,7 +241,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         //4. 解析数据得到 blogId min(这次获取数据中的最小时间戳 方便下次获取作为起始位置) offset 下次获取时的偏移量 之所以变化是为了跳过时间戳相同的且上次获取过的数据
         long minTime = 0;
         int newOffset = 1;
-        ArrayList<Long> blogIds = new ArrayList<>(typedTuples.size());
+        List<Long> blogIds = new ArrayList<>(typedTuples.size());
         for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
             //4.1 获取 blogId
             blogIds.add(Long.valueOf(typedTuple.getValue()));
@@ -258,7 +258,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         }
 
         //5. 有了blogId 需要查出 blog 的信息 包括用户信息 当前用户是否点赞等信息
-        List<Blog> blogs = getBlogsByOrderByBlogIds(blogIds);
+        List<Blog> blogs = getListOrderByBlogIds(blogIds);
 
         //todo:优化
         for (Blog blog : blogs) {
@@ -273,7 +273,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
     }
 
-    private List<Blog> getBlogsByOrderByBlogIds(ArrayList<Long> blogIds) {
-        return baseMapper.selectBlogsBatchOrderByBlogsId(blogIds);
+    private List<Blog> getListOrderByBlogIds(List<Long> blogIds) {
+        return baseMapper.selectBatchIdsOrderByIds(blogIds);
     }
 }

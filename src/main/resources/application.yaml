@@ -21,6 +21,8 @@ spring:
         time-between-eviction-runs: 10s
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
+  main:
+    allow-circular-references: true # 允许循环依赖
 mybatis-plus:
   type-aliases-package: top.devildyw.hmdp.entity # 别名扫描包
 logging:

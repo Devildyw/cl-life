@@ -132,7 +132,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public List<UserDTO> queryListByOrder(List<Long> ids) {
 
-        return baseMapper.selectBatchIdsByOrder(ids);
+        return baseMapper.selectBatchIdsOrderByIds(ids);
     }
 
 

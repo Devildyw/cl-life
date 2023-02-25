@@ -16,5 +16,5 @@ import java.util.List;
  */
 public interface UserMapper extends BaseMapper<User> {
 
-    List<UserDTO> selectBatchIdsByOrder(List<Long> ids);
+    List<UserDTO> selectBatchIdsOrderByIds(List<Long> ids);
 }
