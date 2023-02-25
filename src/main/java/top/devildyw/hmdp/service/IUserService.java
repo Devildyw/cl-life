@@ -48,4 +48,17 @@ public interface IUserService extends IService<User> {
      * @return
      */
     List<UserDTO> queryListByOrder(List<Long> ids);
+
+    /**
+     * 借助 Redis 的 BitMap 实现用户签到
+     * @return
+     */
+    Result sign();
+
+    /**
+     * 借助 Redis 的 BitMap 结构实现对用户签到的统计
+     * @return
+     */
+    Result signCount();
+
 }

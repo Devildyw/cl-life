@@ -3,12 +3,14 @@ package top.devildyw.hmdp.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import top.devildyw.hmdp.dto.LoginFormDTO;
 import top.devildyw.hmdp.dto.Result;
@@ -18,10 +20,13 @@ import top.devildyw.hmdp.mapper.UserMapper;
 import top.devildyw.hmdp.service.IUserService;
 import org.springframework.stereotype.Service;
 import top.devildyw.hmdp.utils.RegexUtils;
+import top.devildyw.hmdp.utils.UserHolder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -133,6 +138,88 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public List<UserDTO> queryListByOrder(List<Long> ids) {
 
         return baseMapper.selectBatchIdsOrderByIds(ids);
+    }
+
+    @Override
+    public Result sign() {
+        //1. 获取用户id
+        Long userId = UserHolder.getUser().getId();
+        //2. 用户当前时间年月
+        LocalDateTime now = LocalDateTime.now();
+        String date = now.format(DateTimeFormatter.ofPattern(":yyyy:MM"));
+
+        //3. 拼装 key sign:userId:year:month
+        String key = USER_SIGN_KEY+userId+date;
+        //3.1 计算今天是该月的第几天
+        int day = now.getDayOfMonth();
+
+        //4. 判断用户是否签到
+        Boolean isSign = stringRedisTemplate.opsForValue().getBit(key, day-1);
+        if (BooleanUtil.isTrue(isSign)){
+            //4.1 如果用户已经签到 返回已签到信息
+            return Result.fail("你已经签过到了!");
+        }
+
+        //5. 如果没有签到则签到
+        stringRedisTemplate.opsForValue().setBit(key,day-1,true);
+        return Result.ok();
+    }
+
+    @Override
+    public Result signCount() {
+        //1. 获取用户id
+        Long userId = UserHolder.getUser().getId();
+        //2. 用户当前时间年月
+        LocalDateTime now = LocalDateTime.now();
+        String date = now.format(DateTimeFormatter.ofPattern(":yyyy:MM"));
+
+        //3. 拼装 key sign:userId:year:month
+        String key = USER_SIGN_KEY+userId+date;
+        //3.1 计算今天是该月的第几天
+        int day = now.getDayOfMonth();
+
+        //4. 判断今天是否签到
+        Boolean isSign = stringRedisTemplate.opsForValue().getBit(key, day - 1);
+        if (BooleanUtil.isFalse(isSign)){
+            //4.1 如果今天未签到则只统计从前一天开始的连续签到数
+            --day;
+        }
+        //4.2 如果签到了就从今天开始
+
+        //5. 获取到今天位置的签到记录的十进制格式 BITFIELD sign:userId:year:MM GET u[dayOfMonth] 0
+        List<Long> result = stringRedisTemplate.opsForValue()
+                .bitField(key,
+                        BitFieldSubCommands.create().get(BitFieldSubCommands.BitFieldType.unsigned(day)).valueAt(0));
+
+        //5.1 判空
+        if (result==null|| result.isEmpty()){
+            //5.2 如果为空则代表该月没有签到记录返回0
+            return Result.ok(0);
+        }
+
+        //6. 获取该月签到记录
+        Long record = result.get(0);
+        //6.1 判断记录是否有值
+        if (ObjectUtil.isNull(record)||record==0){
+            //6.2 如果记录为空或者为0 也没有记录
+            return Result.ok(0);
+        }
+
+        //7. 获取用户该月的连续签到记录
+        int count = 0;
+        //7.1 通过位运算来计算该月用户连续签到 count += record&1; record>>>=1;
+        while (true){
+            //7.2 通过1与每一位做位运算 会得到该位本身 如果为0则代表没有连续上
+            if ((record&1)==0){
+                break;
+            }
+            //7.3 记录连续签到天数
+            count++;
+            //7.4 record无符号右移实现遍历效果
+            record>>>=1;
+        }
+
+        return Result.ok(count);
     }
 
 

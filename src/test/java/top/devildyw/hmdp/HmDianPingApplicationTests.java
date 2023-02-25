@@ -83,6 +83,21 @@ class HmDianPingApplicationTests {
         //
     }
 
+    @Test
+    public void test(){
+        Long record = 1L;
+        int count = 0;
+        while (true){
+            if ((record&1)==0){
+                break;
+            }
+            count+=1;
+            record>>>=1;
+        }
+
+        System.out.println(count);
+    }
+
 
     /** 新增秒杀券 todo:删除
      * {

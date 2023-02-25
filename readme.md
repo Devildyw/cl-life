@@ -638,3 +638,172 @@ Feed 流有两种常见模式：
 
 ### 推模式实现 Feed 流
 
+当用户发送 blog 的时候同时将 blog 的id 推送到用户粉丝的 ZSet 信箱中（因为要按照时间先后来获取，时间戳作为 score）中。
+
+等到粉丝用户想要获取到他的关注列表内的blog时，直接从信箱（ZSet）查询即可。
+
+### Feed 流分页问题
+
+Feed 流中的数据会不断更新，所以数据的角标也在变化，所以传统的分页方式不能使用。
+
+传统分页方式是根据当前数据（page size），但是 Feed 流中的数据是不断变化的而且是按时间戳排序获取，这样会导致我们每次去获取分页数据时可能会出现重复元素的情况，
+
+![image-20230225124432760](https://ding-blog.oss-cn-chengdu.aliyuncs.com/images/image-20230225124432760.png)
+
+> 所以我们需要使用另一种方式，每次都从上一次的最后一个位置的下标开始取（ZSet 我们按照时间戳取），所以需要维护一个最小下标。
+>
+> 又因为时间戳在高并发的情况下是可能重复的，所以这里还要记录一个偏移量。用来规避上次获取到的元素（因为是按照上次维护最小时间戳开始查，如果不记录从最小时间戳的第几个开始查就会导致查出上次获取到的元素）
+
+```java
+public Result queryBlogOfFollow(Long max, Integer offset) {
+    //1. 获取用户id
+    Long userId = UserHolder.getUser().getId();
+
+    //2. 查询收件箱 ZREVRANGEBYSCORE key Max Min LIMIT offset count 根据时间戳降序获取
+    String key = FEED_KEY + userId;
+    Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
+            .reverseRangeByScoreWithScores(key, 0, max, offset, DEFAULT_PAGE_SIZE);
+
+    //3. 判空
+    if (typedTuples == null || typedTuples.isEmpty()) {
+        return Result.ok(Collections.emptyList());
+    }
+
+    //4. 解析数据得到 blogId min(这次获取数据中的最小时间戳 方便下次获取作为起始位置) offset 下次获取时的偏移量 之所以变化是为了跳过时间戳相同的且上次获取过的数据
+    long minTime = 0;
+    int newOffset = 1;
+    List<Long> blogIds = new ArrayList<>(typedTuples.size());
+    for (ZSetOperations.TypedTuple<String> typedTuple : typedTuples) {
+        //4.1 获取 blogId
+        blogIds.add(Long.valueOf(typedTuple.getValue()));
+        //4.2 获取时间戳
+        long time = typedTuple.getScore().longValue();
+
+        //4.3 获得最小值 且根据最小值出现的次数取更新 newOffset ZSet是有序的
+        if (time == minTime) {
+            newOffset++;
+        } else {
+            minTime = time;
+            newOffset = 1;
+        }
+    }
+
+    //5. 有了blogId 需要查出 blog 的信息 包括用户信息 当前用户是否点赞等信息
+    List<Blog> blogs = getListOrderByBlogIds(blogIds);
+
+    //todo:优化
+    for (Blog blog : blogs) {
+        //5.1 获取blog的作者信息
+        queryBlogUser(blog);
+        //5.2判断当前登录用户是否点赞
+        isBlogLiked(blog);
+    }
+
+    //6. 封装并返回
+    return Result.ok(new ScrollResult(blogs, minTime, newOffset));
+
+}
+```
+
+## Redis 实现附近商铺
+
+通过 Redis 的 GEO 数据结构来存储商铺的 id 和 商铺的地理位置（在新增商铺/修改商铺的时候）。
+
+> key：“shop:geo:typeId”，因为一般用户都是按商铺类型来查询商铺，所以这里直接按typeId存储
+
+通过这些数据在用户想要获取附近商铺的信息时，前端获取到用户的地理位置然后传到后端，通过 GEO 的GEOSEARCH 来获取按矩形范围/圆形范围内的。
+
+
+
+## Redis 实现签到功能
+
+使用 Redis 的 BitMap 来存储用户一个月内的签到信息。
+
+因为 BitMap 是一个比特数组，所以每一位的两种状态刚好对应了签到的两种状态。
+
+> key:”sign:userId:year:month”
+
+记录一个用户一个月的签到情况最多只需要使用 32bit = 4Byte 一年也才48Byte 所以是很节省空间的。如果使用 mysql 记录就会导致存储一天的签到记录会使用 近 22 个字节
+
+![image-20230225132723871](https://ding-blog.oss-cn-chengdu.aliyuncs.com/images/image-20230225132723871.png)
+
+但其实实现签到的方式有很多，也可能只记录昨天/今天/后天的签到情况，这样的话使用 String 也是可以的，到时使用过期时间来删除key即可。
+
+```java
+@Override
+public Result sign() {
+    //1. 获取用户id
+    Long userId = UserHolder.getUser().getId();
+    //2. 用户当前时间年月
+    LocalDateTime now = LocalDateTime.now();
+    String date = now.format(DateTimeFormatter.ofPattern(":yyyy:MM"));
+
+    //3. 拼装 key sign:userId:year:month
+    String key = USER_SIGN_KEY+userId+date;
+    //3.1 计算今天是该月的第几天
+    int day = now.getDayOfMonth();
+
+    //4. 判断用户是否签到
+    Boolean isSign = stringRedisTemplate.opsForValue().getBit(key, day-1);
+    if (BooleanUtil.isTrue(isSign)){
+        //4.1 如果用户已经签到 返回已签到信息
+        return Result.fail("你已经签过到了!");
+    }
+
+    //5. 如果没有签到则签到
+    stringRedisTemplate.opsForValue().setBit(key,day-1,true);
+    return Result.ok();
+}
+```
+
+ ### 实现签到统计功能
+
+![image-20230225133202433](https://ding-blog.oss-cn-chengdu.aliyuncs.com/images/image-20230225133202433.png)
+
+通过获取到用户该月到该天的签到次数，然后从后往前与1做与运算（与1与运算得到是它本身，查找连续签到），如果为0跳出循环。
+
+> 如何实现遍历，通过移位来实现。
+>
+> ![image-20230225133152707](https://ding-blog.oss-cn-chengdu.aliyuncs.com/images/image-20230225133152707.png)
+
+
+
+## Redis 实现 UV 统计
+
+> UV：全称Unique Visitor，也叫独立访客量，是指通过互联网访问、浏览这个网页的自然人。1天内同一个用户多次访问该网站，只记录1次。
+
+> PV：全称Page View，也叫页面访问量或点击量，用户每访问网站的一个页面，记录1次PV，用户多次打开页面，则记录多次PV。往往用来衡量网站的流量。
+
+**HyperLoglog：**
+
+Hyperloglog(HLL) 是从 Loglog 算法派生的概率算法，用于确定非常大的集合的基数，而不需要存储其所有值。
+
+> Redis 中的 HLL 是基于string结构实现的，单个 HLL 的内存永远小于 16kb ，内存占用低的令人发指！作为代价，其测量结果是概率性的，有小于 0.81％ 的误差。不过对于UV统计来说，这完全可以忽略。
+
+所以使用 HyperLoglog 来统计系统每天的 UV 量是很不错的选择，因为 HyperLoglog 的一个 key 的内存大小不会超过 16kb，使用它来存储虽然有误差，但是如果千万用户访问的情况下只需要消耗 16kb 就能统计还是十分不错的，如果对数据不允许有误差还是不适合。
+
+HyperLogLog的作用：
+
+* 做海量数据的统计工作
+
+HyperLogLog的优点：
+
+* 内存占用极低性能非常好
+
+HyperLogLog的缺点：
+
+* 有一定的误差
+
+> 统计后的数据一般用在管理端。
+
+
+
+# TODO：
+
+* 使用 rocketMQ 代替 Redis Stream 
+
+* 循环插入 redis 的操作使用 pipeline 批量插入
+
+* sa-token 整合做鉴权
+
+  

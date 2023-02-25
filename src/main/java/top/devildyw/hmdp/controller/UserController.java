@@ -102,4 +102,19 @@ public class UserController {
         return Result.ok(info);
     }
 
+    /**
+     * 用户签到
+     * @return
+     */
+    @PostMapping("/sign")
+    public Result sign(){
+        return userService.sign();
+    }
+
+
+
+    @GetMapping("/sign/count")
+    public Result signCount(){
+        return userService.signCount();
+    }
 }
