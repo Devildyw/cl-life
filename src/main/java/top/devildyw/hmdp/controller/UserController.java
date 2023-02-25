@@ -15,6 +15,7 @@ import top.devildyw.hmdp.utils.UserHolder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 /**
  * <p>

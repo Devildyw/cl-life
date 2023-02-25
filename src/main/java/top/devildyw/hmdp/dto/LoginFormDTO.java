@@ -12,11 +12,12 @@ import javax.validation.constraints.Pattern;
 @Data
 public class LoginFormDTO {
 
-    @Pattern(regexp = "top.devildyw.hmdp.RegexPatterns.PHONE_REGEX")
+    @Pattern(regexp = "top.devildyw.hmdp.RegexPatterns.PHONE_REGEX",message = "手机号格式错误！")
     @NotBlank(message = "手机号不能为空")
     private String phone;
 
-    @NotBlank(message = "验证码不能为空")
+    @Pattern(regexp = "top.devildyw.hmdp.RegexPatterns.PASSWORD_REGEX",message = "验证码格式错误！")
+    @NotBlank(message = "验证码不能为空！")
     private String code;
     private String password;
 }

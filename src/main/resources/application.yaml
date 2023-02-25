@@ -2,6 +2,7 @@ server:
   port: 8081
 
 spring:
+
   application:
     name: hmdp
   datasource:
@@ -28,3 +29,10 @@ mybatis-plus:
 logging:
   level:
     top.devildyw.hmdp: debug
+
+
+rocketmq:
+  name-server: 47.109.62.70:9876
+  producer:
+    group: group1
+
