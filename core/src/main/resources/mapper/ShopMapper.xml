@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="top.devildyw.hmdp.mapper.ShopMapper">
-    <select id="selectBatchIdsOrderByIds" resultType="top.devildyw.hmdp.entity.Shop">
+<mapper namespace="top.devildyw.cl_dianping.core.mapper.ShopMapper">
+    <select id="selectBatchIdsOrderByIds" resultType="top.devildyw.cl_dianping.core.entity.Shop">
         select * from tb_shop
         <where>
             id in

@@ -4,7 +4,7 @@ server:
 spring:
 
   application:
-    name: hmdp
+    name: cl_dianping
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://124.222.35.20:3319/hmdp?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
@@ -25,10 +25,10 @@ spring:
   main:
     allow-circular-references: true # 允许循环依赖
 mybatis-plus:
-  type-aliases-package: top.devildyw.hmdp.entity # 别名扫描包
+  type-aliases-package: top.devildyw.cl_dianping.core.entity # 别名扫描包
 logging:
   level:
-    top.devildyw.hmdp: debug
+    top.devildyw.cl_dianping.core: debug
 
 
 rocketmq:

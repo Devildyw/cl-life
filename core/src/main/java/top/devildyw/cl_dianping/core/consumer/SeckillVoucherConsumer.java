@@ -7,6 +7,7 @@ import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import top.devildyw.cl_dianping.common.DTO.SeckillVoucherMQDTO;
 import top.devildyw.cl_dianping.common.constants.MQConstants;
