@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="top.devildyw.hmdp.mapper.UserMapper">
+    <resultMap id="userDTO" type="top.devildyw.cl_dianping.common.DTO.UserDTO">
+        <result property="id" column="id"/>
+        <result property="icon" column="icon"/>
+        <result property="nickName" column="nike_name"/>
+    </resultMap>
+
+
+    <select id="selectBatchIdsOrderByIds" resultMap="userDTO">
+        select id, icon, nick_name from tb_user
+        <where>
+            id in
+            <foreach collection="list" open="(" item="item" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        order by field(id,
+        <foreach collection="list" item="id" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+</mapper>
