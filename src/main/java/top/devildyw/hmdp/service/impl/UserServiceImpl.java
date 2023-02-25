@@ -9,25 +9,26 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 import top.devildyw.hmdp.dto.LoginFormDTO;
 import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.dto.UserDTO;
 import top.devildyw.hmdp.entity.User;
 import top.devildyw.hmdp.mapper.UserMapper;
 import top.devildyw.hmdp.service.IUserService;
-import org.springframework.stereotype.Service;
 import top.devildyw.hmdp.utils.RegexUtils;
 import top.devildyw.hmdp.utils.UserHolder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static top.devildyw.hmdp.utils.RedisConstants.*;
@@ -38,8 +39,8 @@ import static top.devildyw.hmdp.utils.SystemConstants.USER_NICK_NAME_PREFIX;
  * 服务实现类
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author Devil
+ * @since 2023-01-11-15:35
  */
 @Service
 @Slf4j
@@ -110,6 +111,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String token = UUID.randomUUID().toString(true);
         //8.3 将user对象转为 Hash存储
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        userDTO.setToken(token);
         Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
                 CopyOptions.create()
                         //是否忽略空字段值
@@ -216,15 +218,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             //7.3 记录连续签到天数
             count++;
             //7.4 record无符号右移实现遍历效果
-            record>>>=1;
+            record >>>= 1;
         }
 
         return Result.ok(count);
     }
 
+    @Override
+    public void logout() {
+        //1. 获取用户id
+        UserDTO user = UserHolder.getUser();
+        //2. tokenkey
+        String tokenKey = LOGIN_USER_KEY + user.getToken();
+        //2. 删除用户在Redis中的session
+        stringRedisTemplate.opsForHash().getOperations().delete(tokenKey);
+    }
+
 
     /**
      * 根据手机号创建新用户并保存到数据库
+     *
      * @param phone
      */
     private User createUserWithPhone(String phone) {

@@ -14,8 +14,8 @@ import java.util.List;
  *  服务类
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author Devil
+ * @since 2023-01-11-15:35
  */
 public interface IUserService extends IService<User> {
 
@@ -57,8 +57,14 @@ public interface IUserService extends IService<User> {
 
     /**
      * 借助 Redis 的 BitMap 结构实现对用户签到的统计
+     *
      * @return
      */
     Result signCount();
+
+    /**
+     * 用户退出，删除用户的session 即删除用户在Redis 中的session
+     */
+    void logout();
 
 }

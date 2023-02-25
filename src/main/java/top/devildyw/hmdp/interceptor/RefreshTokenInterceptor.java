@@ -17,6 +17,7 @@ import static top.devildyw.hmdp.utils.RedisConstants.LOGIN_USER_KEY;
 import static top.devildyw.hmdp.utils.RedisConstants.LOGIN_USER_TTL;
 
 /**
+ * token刷新拦截器
  * @author Devil
  * @since 2023-02-20-21:22
  */

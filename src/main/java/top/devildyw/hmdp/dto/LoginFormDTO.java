@@ -5,6 +5,10 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
+/**
+ * @author Devil
+ * @since 2023-01-20-15:27
+ */
 @Data
 public class LoginFormDTO {
 

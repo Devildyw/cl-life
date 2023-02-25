@@ -3,7 +3,8 @@ package top.devildyw.hmdp.utils;
 import cn.hutool.core.util.StrUtil;
 
 /**
- * @author 虎哥
+ * @author Devil
+ * @since 2023-01-20-16:01
  */
 public class RegexUtils {
     /**

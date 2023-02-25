@@ -1,7 +1,8 @@
 package top.devildyw.hmdp.utils;
 
 /**
- * @author 虎哥
+ * @author Devil
+ * @since 2023-01-20-15:27
  */
 public abstract class RegexPatterns {
     /**

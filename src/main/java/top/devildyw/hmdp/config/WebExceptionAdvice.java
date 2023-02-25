@@ -1,10 +1,14 @@
 package top.devildyw.hmdp.config;
 
-import top.devildyw.hmdp.dto.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import top.devildyw.hmdp.dto.Result;
 
+/**
+ * @author Devil
+ * @since 2023-02-21-15:27
+ */
 @Slf4j
 @RestControllerAdvice
 public class WebExceptionAdvice {

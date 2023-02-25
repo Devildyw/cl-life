@@ -2,31 +2,27 @@ package top.devildyw.hmdp.controller;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 import top.devildyw.hmdp.dto.LoginFormDTO;
 import top.devildyw.hmdp.dto.Result;
 import top.devildyw.hmdp.dto.UserDTO;
-import top.devildyw.hmdp.entity.Blog;
 import top.devildyw.hmdp.entity.User;
 import top.devildyw.hmdp.entity.UserInfo;
 import top.devildyw.hmdp.service.IUserInfoService;
 import top.devildyw.hmdp.service.IUserService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import top.devildyw.hmdp.utils.SystemConstants;
 import top.devildyw.hmdp.utils.UserHolder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
-import java.util.List;
 
 /**
  * <p>
  * 前端控制器
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author Devil
+ * @since 2023-01-11-15:27
  */
 @Slf4j
 @RestController
@@ -63,9 +59,9 @@ public class UserController {
      * @return 无
      */
     @PostMapping("/logout")
-    public Result logout(){
-        // TODO 实现登出功能
-        return Result.fail("功能未完成");
+    public Result logout() {
+        userService.logout();
+        return Result.ok();
     }
 
     @GetMapping("/me")

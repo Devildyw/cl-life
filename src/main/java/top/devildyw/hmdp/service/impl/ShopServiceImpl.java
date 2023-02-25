@@ -33,8 +33,8 @@ import static top.devildyw.hmdp.utils.SystemConstants.DEFAULT_PAGE_SIZE;
  *  服务实现类
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author Devil
+ * @since 2023-01-11-15:35
  */
 @Service
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {

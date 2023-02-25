@@ -6,6 +6,10 @@ import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @author Devil
+ * @since 2023-02-11-15:27
+ */
 public class PasswordEncoder {
 
     public static String encode(String password) {

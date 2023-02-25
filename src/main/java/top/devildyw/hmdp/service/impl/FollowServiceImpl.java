@@ -26,8 +26,8 @@ import static top.devildyw.hmdp.utils.RedisConstants.FOLLOW_KEY;
  * 服务实现类
  * </p>
  *
- * @author Devildyw
- * @since 2022-12-22
+ * @author Devil
+ * @since 2023-01-11-15:35
  */
 @Service
 public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> implements IFollowService {

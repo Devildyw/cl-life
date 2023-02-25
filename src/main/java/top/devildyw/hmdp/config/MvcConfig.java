@@ -11,7 +11,7 @@ import javax.annotation.Resource;
 
 /**
  * @author Devil
- * @since 2023-02-20-20:03
+ * @since 2023-01-20-20:03
  */
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
@@ -28,8 +28,7 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/upload/**",
                         "/blog/hot",
                         "/user/code",
-                        "/user/login",
-                        "/blog/like/{id}"
+                        "/user/login"
                 ).order(1);
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate)).addPathPatterns("/**").order(0);
     }

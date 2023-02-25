@@ -23,8 +23,8 @@ import static top.devildyw.hmdp.utils.RedisConstants.CACHE_SHOP_TYPE_TTL;
  *  服务实现类
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author Devil
+ * @since 2023-01-11-15:35
  */
 @Service
 public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> implements IShopTypeService {

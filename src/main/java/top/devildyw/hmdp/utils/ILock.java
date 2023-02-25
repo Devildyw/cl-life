@@ -3,7 +3,7 @@ package top.devildyw.hmdp.utils;
 /**
  * 锁的接口规范锁必须实现 tryLock 和 unLock 方法
  * @author Devil
- * @since 2023-02-21-19:08
+ * @since 2023-02-15-19:08
  */
 public interface ILock {
 

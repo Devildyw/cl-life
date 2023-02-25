@@ -21,8 +21,8 @@ import static top.devildyw.hmdp.utils.RedisConstants.SECKILL_STOCK_KEY;
  *  服务实现类
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author Devil
+ * @since 2023-01-11-15:35
  */
 @Service
 public class VoucherServiceImpl extends ServiceImpl<VoucherMapper, Voucher> implements IVoucherService {
