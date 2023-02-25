@@ -29,7 +29,6 @@ import static top.devildyw.hmdp.utils.RedisConstants.LOGIN_USER_TTL;
 public class LoginInterceptor implements HandlerInterceptor {
 
 
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         //1. 判断是否需要拦截（ThreadLocal 中是否有用户）
@@ -38,6 +37,8 @@ public class LoginInterceptor implements HandlerInterceptor {
             response.setStatus(401);
             return false;
         }
+        //todo: 消息队列异步UV统计
+
         return true;
     }
 }
